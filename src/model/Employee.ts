@@ -1,16 +1,10 @@
-type EmployeeType = {
-    email: string;
-    password: string;
-    name: string;
-    hour: number;
-    age: number;
-    image: string;
-    role: string;
-    salary: string;
-    gender: boolean;
-}
+import moment from 'moment';
+import { EmployeeType } from '../constant/user.type';
 
-class Employee {
+
+
+export class Employee {
+    _id: string;
     email: string;
     password: string;
     name: string;
@@ -18,9 +12,13 @@ class Employee {
     age: number;
     image: string;
     role: string;
-    salary: string;
+    salary: number;
     gender: boolean;
+    delete: boolean;
+    created_at: string;
+    updated_at: string;
     constructor(employee: EmployeeType) {
+        this._id = employee._id;
         this.email = employee.email;
         this.password = employee.password;
         this.name = employee.name;
@@ -30,27 +28,12 @@ class Employee {
         this.role = employee.role;
         this.salary = employee.salary;
         this.gender = employee.gender;
+        this.delete = employee.delete || false;
+        this.created_at = employee.created_at || moment(new Date()).format('MM-DD-YYYY\tHH:mm:ssSSS');
+        this.updated_at = employee.updated_at || moment(new Date()).format('MM-DD-YYYY\tHH:mm:ssSSS');
     }
-    // addEmp(): void {
-    //     let trow = "";
-    //     var body = document.getElementById("dataNV") as HTMLElement;
-    //     // for (let emp of empList) {
-    //     //     trow += `<tr>
-    //     //     <th scope="row">1</th>
-    //     //     <td>${emp.name}</td>
-    //     //     <td>${emp.email}</td>
-    //     //     <td>${emp.hour}</td>
-    //     //     <td>${emp.role}</td>
-    //     //     <td>${emp.gender}</td>
-    //     //     <td>${emp.salary}</td>
-    //     //     <td><img src="${emp.image}" class="d-block" style="width: 45px; height: 45px; border-radius: 100%;" alt="..."></td>
-    //     //     <td>${emp.age}</td>
-    //     //     </tr>`
-    //     // }
 
-    //     //sử dụng map
-    //     body.innerHTML = trow;
-    // }
-    //  updateEmp(): void;
-    //  deleteEmp(): void;
+
+
 }
+
