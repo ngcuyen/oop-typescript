@@ -36,3 +36,23 @@ html {
     justify-content: center;
 
 }
+
+.iconDelete {
+    color: red;
+    padding: 5px;
+}
+
+.iconDelete:hover {
+    background-color: darkgray;
+    border-radius: 10px;
+}
+
+.iconUpdate {
+    color: blue;
+    padding: 5px;
+}
+
+.iconUpdate:hover {
+    background-color: darkgray;
+    border-radius: 10px;
+}
