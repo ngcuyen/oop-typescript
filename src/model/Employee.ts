@@ -1,8 +1,6 @@
 import moment from 'moment';
 import { EmployeeType } from '../constant/user.type';
 
-
-
 export class Employee {
     _id: string;
     email: string;
@@ -32,8 +30,5 @@ export class Employee {
         this.created_at = employee.created_at || moment(new Date()).format('MM-DD-YYYY\tHH:mm:ssSSS');
         this.updated_at = employee.updated_at || moment(new Date()).format('MM-DD-YYYY\tHH:mm:ssSSS');
     }
-
-
-
 }
 

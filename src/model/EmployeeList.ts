@@ -1,5 +1,4 @@
 import { EmployeeType } from "../constant/user.type";
-//import { Employee } from "./Employee";
 
 export class EmployeeList {
     employeeList: Array<EmployeeType> = this.getData();
@@ -38,11 +37,6 @@ export class EmployeeList {
         this.employeeList = array;
     }
 
-
-    // sortEmployee = () => {
-    //     let cloneList = [...this.employeeList];
-
-    // }
     // Sắp xếp tăng dần theo tên
     sortByNameAsc() {
         let cloneList = [...this.employeeList];
@@ -76,11 +70,22 @@ export class EmployeeList {
         return savedData ? JSON.parse(savedData) as EmployeeType[] : [];
     }
 
+    calculateTotal(employee: { salary: number, role: string }): number {
+        if (employee.role === 'Manager') {
+            return employee.salary * 1.5;
+        } else if (employee.role === 'Executive') {
+            return employee.salary * 3;
+        } else {
+            return employee.salary;
+        }
+    }
+
 
     render(): string {
 
         return this.employeeList.map((employee, index) => {
             let { _id, age, email, gender, hour, role, salary, image, name } = employee;
+            let total = this.calculateTotal({ salary: salary, role: role });
             return `
             <tr key=${index}>
             <td>${_id}</td>
@@ -92,7 +97,7 @@ export class EmployeeList {
             <td>${gender ? 'Male' : 'Female'}</td>
             <td>${salary}</td>
             <td><img src = "${image}" alt="Avatar" class="d-block" style=" width: 45px; height: 45px; borderRadius: 50%;"/></td>
-            <td></td>
+            <td>${total}</td>
             <td> 
                 <i class="fas fa-trash-alt iconDelete" id="${_id}" ></i>
                 <i class="fas fa-pencil-alt iconUpdate" id="${_id}"></i>
@@ -106,6 +111,7 @@ export class EmployeeList {
 
         return arrEmployee.map((employee, index) => {
             let { _id, age, email, gender, hour, role, salary, image, name } = employee;
+            let total = this.calculateTotal({ salary: salary, role: role });
             return `
             <tr key=${index}>
             <td>${_id}</td>
@@ -117,7 +123,7 @@ export class EmployeeList {
             <td>${gender ? 'Male' : 'Female'}</td>
             <td>${salary}</td>
             <td><img src = "${image}" alt="Avatar" class="d-block" style=" width: 45px; height: 45px; borderRadius: 100%;"/></td>
-            <td></td>
+            <td>${total}</td>
             <td> 
                 <i class="fas fa-trash-alt iconDelete" index="${index}" ></i>
                 <i class="fas fa-pencil-alt iconUpdate" index="${index}"></i>

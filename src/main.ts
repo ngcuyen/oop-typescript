@@ -2,23 +2,24 @@ import { Employee } from "./model/Employee";
 import { v4 as uuidv4 } from 'uuid';
 import { EmployeeList } from "./model/EmployeeList";
 import { EmployeeType } from "./constant/user.type";
+import moment from 'moment';
 
-const btnAdd = document.getElementById("btnAdd") as HTMLElement;
-const txtEmail = document.getElementById("txtEmail") as HTMLInputElement;
-const txtPassword = document.getElementById("txtPassword") as HTMLInputElement;
-const txtName = document.getElementById("txtName") as HTMLInputElement;
-const txtWorkHour = document.getElementById("txtWorkHour") as HTMLInputElement;
-const rangeAge = document.getElementById("rangeAge") as HTMLInputElement;
-const txtSalary = document.getElementById("txtSalary") as HTMLInputElement;
-const optMale = document.getElementById("optMale") as HTMLInputElement;
-const optFemale = document.getElementById("optFemale") as HTMLInputElement;
-const cmbRole = document.getElementById("cmbRole") as HTMLInputElement;
-const tbody = document.getElementById("tblEmployee") as HTMLElement;
-const fileImage = document.getElementById("image") as HTMLInputElement;
-const btnReset = document.getElementById('btnReset') as HTMLElement;
-const btnSearch = document.getElementById('btnSearch') as HTMLElement;
-const txtSearch = document.getElementById('txtSearch') as HTMLInputElement;
-const cmbSort = document.getElementById('cmbSort') as HTMLInputElement;
+const btnAdd = <HTMLElement>document.getElementById("btnAdd");
+const txtEmail = <HTMLInputElement>document.getElementById("txtEmail");
+const txtPassword = <HTMLInputElement>document.getElementById("txtPassword");
+const txtName = <HTMLInputElement>document.getElementById("txtName");
+const txtWorkHour = <HTMLInputElement>document.getElementById("txtWorkHour");
+const rangeAge = <HTMLInputElement>document.getElementById("rangeAge");
+const txtSalary = <HTMLInputElement>document.getElementById("txtSalary");
+const optMale = <HTMLInputElement>document.getElementById("optMale");
+const optFemale = <HTMLInputElement>document.getElementById("optFemale");
+const cmbRole = <HTMLInputElement>document.getElementById("cmbRole");
+const tbody = <HTMLElement>document.getElementById("tblEmployee");
+const fileImage = <HTMLInputElement>document.getElementById("image");
+const btnReset = <HTMLElement>document.getElementById('btnReset');
+const btnSearch = <HTMLElement>document.getElementById('btnSearch');
+const txtSearch = <HTMLInputElement>document.getElementById('txtSearch');
+const cmbSort = <HTMLInputElement>document.getElementById('cmbSort');
 
 const convertId = () => {
   const uuid = uuidv4();
@@ -30,6 +31,7 @@ const convertId = () => {
 let employees = new EmployeeList();
 
 function clickAddEmployee() {
+  //lấy dữ liệu từ form...
   const email = txtEmail.value;
   const password = txtPassword.value;
   const name = txtName.value;
@@ -40,6 +42,7 @@ function clickAddEmployee() {
   const gender = optMale.checked ? true : false;
   let image = '';
   if (validationData()) {
+    //...gán vào new Employee
     let createEmployee = () => {
       const nv = new Employee({
         _id: convertId(),
@@ -51,11 +54,10 @@ function clickAddEmployee() {
         salary: salary,
         image: image,
         role: role,
-        gender: gender
+        gender: gender,
       });
       employees.addEmployee(nv);
-      let result = employees.render();
-      tbody.innerHTML = result;
+
     }
     if (fileImage.files && fileImage.files.length > 0) {
       let reader = new FileReader();
@@ -72,11 +74,12 @@ function clickAddEmployee() {
     }
     employees.saveData(employees.employeeList);
   }
-
+  let result = employees.render();
+  tbody.innerHTML = result;
 }
 
 btnAdd.addEventListener('click', clickAddEmployee)
-//fileReader bất đồng bộ, khi lưu vào local storage phải chờ
+//fileReader bất đồng bộ, khi lưu vào local storage phải chờ??
 
 tbody.addEventListener('click', (e) => {
   const target = e.target as HTMLElement;
@@ -91,12 +94,13 @@ tbody.addEventListener('click', (e) => {
   }
 });
 
+//update còn lỗi
 tbody.addEventListener('click', (e) => {
 
   const target = e.target as HTMLElement;
   if (target.classList.contains('iconUpdate')) {
     const id = target.getAttribute('id') as string;
-
+    //tìm nhân viên list có id = id của nhân viên được chọn, rồi đổ dữ liệu vào form
     let nhanVien = employees.employeeList.find(emp => emp._id === id) as EmployeeType;
     if (nhanVien) {
       txtEmail.value = nhanVien.email;
@@ -108,37 +112,39 @@ tbody.addEventListener('click', (e) => {
       txtWorkHour.value = nhanVien.hour.toString();
       fileImage.value = nhanVien.image;
       cmbRole.value = nhanVien.role;
-
+      //sau đó gán lại các thuộc tính chỉnh sửa cho nhân viên đó (trước khi gán thì kiểm tra email có trùng với các email khác không)
+      //chưa được, nó còn hiểu là đang add
       btnAdd.removeEventListener('click', clickAddEmployee);
       btnAdd.addEventListener('click', () => {
-        if (validationData(nhanVien._id, nhanVien.email)) {
-          nhanVien.email = txtEmail.value;
-          nhanVien.name = txtName.value;
-          nhanVien.password = txtPassword.value;
-          nhanVien.salary = +txtSalary.value;
-          optMale.checked == true ? nhanVien.gender = true : nhanVien.gender = false;
-          nhanVien.age = +rangeAge.value;
-          nhanVien.hour = +txtWorkHour.value;
-          if (fileImage.files && fileImage.files.length > 0) {
-            let reader = new FileReader();
-            reader.onload = () => {
-              if (reader.readyState === 2) {
-                nhanVien.image = reader.result as string;
-              }
+        //if (validationData(nhanVien._id, nhanVien.email)) {
+        nhanVien.email = txtEmail.value;
+        nhanVien.name = txtName.value;
+        nhanVien.password = txtPassword.value;
+        nhanVien.salary = +txtSalary.value;
+        optMale.checked == true ? nhanVien.gender = true : nhanVien.gender = false;
+        nhanVien.age = +rangeAge.value;
+        nhanVien.hour = +txtWorkHour.value;
+        nhanVien.updated_at = moment(new Date()).format('MM-DD-YYYY\tHH:mm:ssSSS');
+        nhanVien.role = cmbRole.value;
+        if (fileImage.files && fileImage.files.length > 0) {
+          let reader = new FileReader();
+          reader.onload = () => {
+            if (reader.readyState === 2) {
+              nhanVien.image = reader.result as string;
             }
-            reader.readAsDataURL(fileImage.files[0]);
           }
-          else nhanVien.image = '';
-          nhanVien.role = cmbRole.value;
-          employees.updateEmployee(nhanVien._id, nhanVien);
-          employees.saveData(employees.employeeList);
-          let result = employees.render();
-          tbody.innerHTML = result;
-
+          reader.readAsDataURL(fileImage.files[0]);
         }
+        else nhanVien.image = '';
+
+        employees.updateEmployee(nhanVien._id, nhanVien);
+        employees.saveData(employees.employeeList);
+        // }
       })
     }
   }
+  let result = employees.render();
+  tbody.innerHTML = result;
 });
 
 btnSearch.addEventListener('click', () => {
@@ -166,7 +172,6 @@ function resetForm(): void {
   fileImage.value = '';
   cmbRole.value = 'Employee';
 }
-
 
 btnReset.addEventListener("click", () => {
   resetForm();
@@ -217,7 +222,7 @@ function validationData(employeeId: string = '', employeeEmail: string = ''): bo
     return false;
   }
 
-  //khi cập nhật cần tránh trường hợp tự so sánh trùng email với chính nó, (nhưng chưa được)
+  //khi cập nhật cần tránh trường hợp tự so sánh trùng email với chính nó, (nhưng chưa được với update, với trường hợp add thì oke)
   if (email !== employeeEmail) {
     const existEmployee = employees.employeeList.find((employee) => employee.email === email && employee._id !== employeeId);
     if (existEmployee) {
