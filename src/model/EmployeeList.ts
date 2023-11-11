@@ -9,26 +9,63 @@ export class EmployeeList {
         this.employeeList = cloneList;
     }
 
-    deleteEmployee(index: number): void {
-        this.employeeList.splice(index, 1);
+    // deleteEmployee(index: number): void {
+    //     this.employeeList.splice(index, 1);
+    // }
+    deleteEmployee(id: string): void {
+        this.employeeList = this.employeeList.filter(employee => employee._id !== id);
     }
 
-    updateEmployee(index: number, replaceEmployee: EmployeeType): void {
-        this.employeeList.splice(index, 1, replaceEmployee);
+    // updateEmployee(index: number, replaceEmployee: EmployeeType): void {
+    //     this.employeeList.splice(index, 1, replaceEmployee);
+    // }
+    updateEmployee(id: string, updatedEmployee: EmployeeType): void {
+        const index = this.employeeList.findIndex(employee => employee._id === id);
+        if (index !== -1) {
+            this.employeeList[index] = updatedEmployee;
+        }
     }
 
+    //tìm kiếm theo chức vụ
     searchEmployee(content: string): void {
+        content = content.toLowerCase();
         let cloneList = [...this.employeeList];
         let array: EmployeeType[] = cloneList.filter((item) =>
-            item.role.includes(content)
+            item.role.toLowerCase().includes(content) || // Tìm kiếm trong role
+            item.name.toLowerCase().includes(content) || // Tìm kiếm trong name
+            item._id.toLowerCase().includes(content)   // Tìm kiếm trong id
         );
         this.employeeList = array;
     }
+
 
     // sortEmployee = () => {
     //     let cloneList = [...this.employeeList];
 
     // }
+    // Sắp xếp tăng dần theo tên
+    sortByNameAsc() {
+        let cloneList = [...this.employeeList];
+        return cloneList.sort((a, b) => a.name.localeCompare(b.name));
+
+    }
+    // Sắp xếp giảm dần theo tên
+    sortByNameDesc() {
+        let cloneList = [...this.employeeList];
+        return cloneList.sort((a, b) => b.name.localeCompare(a.name));
+    }
+    // Sắp xếp tăng dần theo ID
+    sortByIdAsc() {
+        let cloneList = [...this.employeeList];
+        return cloneList.sort((a, b) => parseInt(a._id) - parseInt(b._id));
+    }
+
+    // Sắp xếp giảm dần theo ID
+    sortByIdDesc() {
+        let cloneList = [...this.employeeList];
+        return cloneList.sort((a, b) => parseInt(b._id) - parseInt(a._id));
+    }
+
 
     saveData(employees: Array<EmployeeType>) {
         let jsonString = JSON.stringify(employees);
@@ -54,11 +91,11 @@ export class EmployeeList {
             <td>${role}</td>
             <td>${gender ? 'Male' : 'Female'}</td>
             <td>${salary}</td>
-            <td><img src = "${image}" alt="Avatar" class="d-block" style=" width: 45px; height: 45px; borderRadius: 100%;"/></td>
+            <td><img src = "${image}" alt="Avatar" class="d-block" style=" width: 45px; height: 45px; borderRadius: 50%;"/></td>
             <td></td>
             <td> 
-                <i class="fas fa-trash-alt iconDelete" index="${index}" ></i>
-                <i class="fas fa-pencil-alt iconUpdate" index="${index}"></i>
+                <i class="fas fa-trash-alt iconDelete" id="${_id}" ></i>
+                <i class="fas fa-pencil-alt iconUpdate" id="${_id}"></i>
             </td>
             </tr>
             `
