@@ -41,7 +41,7 @@ function clickAddEmployee() {
   const role = cmbRole.value;
   const gender = optMale.checked ? true : false;
   let image = '';
-  if (validationData()) {
+  if (validateEmail(email) && validateName(name) && validatePassword(password)) {
     //...gán vào new Employee
     let createEmployee = () => {
       const nv = new Employee({
@@ -94,7 +94,7 @@ tbody.addEventListener('click', (e) => {
   }
 });
 
-//update còn lỗi
+//update còn lỗi, khi update nó tự so sánh email với chính mình 
 tbody.addEventListener('click', (e) => {
 
   const target = e.target as HTMLElement;
@@ -112,43 +112,47 @@ tbody.addEventListener('click', (e) => {
       txtWorkHour.value = nhanVien.hour.toString();
       fileImage.value = nhanVien.image;
       cmbRole.value = nhanVien.role;
+
       //sau đó gán lại các thuộc tính chỉnh sửa cho nhân viên đó (trước khi gán thì kiểm tra email có trùng với các email khác không)
-      //chưa được, nó còn hiểu là đang add
+      //file reader bất đồng bộ nên khi tải ảnh lên, phải đợi nó hiển thị (??sos)
       btnAdd.removeEventListener('click', clickAddEmployee);
       btnAdd.addEventListener('click', () => {
-        //if (validationData(nhanVien._id, nhanVien.email)) {
-        nhanVien.email = txtEmail.value;
-        nhanVien.name = txtName.value;
-        nhanVien.password = txtPassword.value;
-        nhanVien.salary = +txtSalary.value;
-        optMale.checked == true ? nhanVien.gender = true : nhanVien.gender = false;
-        nhanVien.age = +rangeAge.value;
-        nhanVien.hour = +txtWorkHour.value;
-        nhanVien.updated_at = moment(new Date()).format('MM-DD-YYYY\tHH:mm:ssSSS');
-        nhanVien.role = cmbRole.value;
-        if (fileImage.files && fileImage.files.length > 0) {
-          let reader = new FileReader();
-          reader.onload = () => {
-            if (reader.readyState === 2) {
-              nhanVien.image = reader.result as string;
-            }
-          }
-          reader.readAsDataURL(fileImage.files[0]);
-        }
-        else nhanVien.image = '';
+        // checkEmail(txtEmail.value);
+        if (validateEmail(txtEmail.value) && validateName(txtName.value) && validatePassword(txtPassword.value)) {
+          nhanVien.email = txtEmail.value;
+          nhanVien.name = txtName.value;
+          nhanVien.password = txtPassword.value;
+          nhanVien.salary = +txtSalary.value;
+          optMale.checked == true ? nhanVien.gender = true : nhanVien.gender = false;
+          nhanVien.age = +rangeAge.value;
+          nhanVien.hour = +txtWorkHour.value;
+          nhanVien.updated_at = moment(new Date()).format('MM-DD-YYYY\tHH:mm:ssSSS');
+          nhanVien.role = cmbRole.value;
 
-        employees.updateEmployee(nhanVien._id, nhanVien);
-        employees.saveData(employees.employeeList);
-        // }
+          if (fileImage.files && fileImage.files.length > 0) {
+            let reader = new FileReader();
+            reader.onload = () => {
+              if (reader.readyState === 2)
+                nhanVien.image = reader.result as string;
+            }
+            reader.readAsDataURL(fileImage.files[0]);
+          }
+          else nhanVien.image = '';
+
+          employees.updateEmployee(nhanVien._id, nhanVien);
+          employees.saveData(employees.employeeList);
+          let result = employees.render();
+          tbody.innerHTML = result;
+        }
       })
     }
   }
-  let result = employees.render();
-  tbody.innerHTML = result;
+
 });
 
 btnSearch.addEventListener('click', () => {
   employees.searchEmployee(txtSearch.value);
+  //nếu txtSearch trống thì render dữ liệu lấy từ local
   if (txtSearch.value == "") {
     let dataGet: EmployeeType[] = employees.getData();
     let content = employees.renderArray(dataGet);
@@ -210,25 +214,79 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 
-function validationData(employeeId: string = '', employeeEmail: string = ''): boolean {
-  const email = txtEmail.value;
-  const name = txtName.value;
-  const password = txtPassword.value;
-  const salary = txtSalary.value;
-  const workHour = txtWorkHour.value;
 
-  if (email === '' || name === '' || password === '' || salary === '' || workHour === '') {
-    alert("Please fill in all fields");
-    return false;
-  }
-
-  //khi cập nhật cần tránh trường hợp tự so sánh trùng email với chính nó, (nhưng chưa được với update, với trường hợp add thì oke)
-  if (email !== employeeEmail) {
-    const existEmployee = employees.employeeList.find((employee) => employee.email === email && employee._id !== employeeId);
-    if (existEmployee) {
-      alert("Email already exist");
-      return false;
-    }
-  }
-  return true;
+// hiển thị lỗi trong span
+function showError(input: HTMLInputElement, error: string): void {
+  const formField = <HTMLInputElement>input.parentElement;
+  const message = formField.querySelector('.form-message') as HTMLElement;
+  input.classList.add('is-invalid');
+  message.textContent = error;
 }
+
+//ẩn lỗi 
+function hideError(input: HTMLInputElement): void {
+  const formField = <HTMLInputElement>input.parentElement;
+  const message = formField.querySelector('.form-message') as HTMLElement;
+  input.classList.remove('is-invalid');
+  message.textContent = '';
+}
+//check email trùng
+function checkEmail(email: string): void {
+  let employee = <EmployeeType>employees.employeeList.find(emp => emp.email === email)
+  if (employee) {
+    showError(txtEmail, 'Existed email');
+  }
+}
+
+//function validateData(): void {
+//đúng định dạng email
+function validateEmail(email: string): boolean {
+  const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+  return regex.test(email);
+}
+txtEmail.onblur = () => {
+  checkEmail(txtEmail.value);
+  if (!validateEmail(txtEmail.value)) {
+    showError(txtEmail, 'Invalid email format');
+  }
+};
+
+//tên chỉ chứa chữ, từ 10-30 ký tự
+function validateName(name: string): boolean {
+  const regex = /^[a-zA-Z\s]{10,30}$/;
+  return regex.test(name);
+}
+txtName.onblur = () => {
+  if (!validateName(txtName.value)) {
+    showError(txtName, 'Name must be 10-30 characters and has no special characters');
+  }
+};
+
+//mật khẩu ít nhất 8 kí tự, ít nhất 1 chữ hoa, 1 chữ thường, 1 ký tự đặc biệt
+function validatePassword(password: string): boolean {
+  const regex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
+  return regex.test(password);
+}
+txtPassword.onblur = () => {
+  if (!validatePassword(txtPassword.value)) {
+    showError(txtPassword, 'Password must be at least 8 characters, at least one number and both lower and uppercase letters and special characters');
+  }
+};
+
+// giờ làm, lương
+const fields = [txtWorkHour, txtSalary];
+fields.forEach(field => {
+  field.onblur = () => {
+    if (field.value.trim() === '') {
+      showError(field, 'Field is required');
+    }
+  };
+});
+
+// Ẩn thông báo lỗi khi người dùng nhập lại tất cả các input
+const allFields = [...fields, txtEmail, txtName, txtPassword]
+allFields.forEach(field => {
+  field.onfocus = () => {
+    hideError(field);
+  };
+});

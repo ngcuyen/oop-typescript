@@ -18,26 +18,30 @@
     <h1 class="text-center">Quản Lý Nhân Viên</h1>
     <form class="row g-3" id="formInfo">
       <div class="col-md-6">
-        <label for="inputEmail4" class="form-label ">Email</label>
+        <label for="inputEmail" class="form-label ">Email</label>
         <input type="email" class="form-control " id="txtEmail" required>
+        <span class="form-message"></span>
       </div>
       <div class="col-md-6">
         <label for="lblPassword" class="form-label">Password</label>
         <!-- is-invalid -->
         <input type="password" class="form-control " id="txtPassword" required>
         <div id="errorPassword" class="invalid-feedback">
-          incorrect password
+          <!-- incorrect password -->
         </div>
+        <span class="form-message"></span>
       </div>
       <div class="col-12">
         <div class="row">
           <div class="col-md-6">
-            <label for="inputAddress" class="form-label">Name</label>
+            <label for="inputName" class="form-label">Name</label>
             <input type="text" class="form-control " id="txtName" placeholder="" required>
+            <span class="form-message"></span>
           </div>
           <div class="col-md-6">
-            <label for="inputCity" class="form-label">Work Hour</label>
+            <label for="inputHour" class="form-label">Work Hour</label>
             <input type="text" class="form-control " id="txtWorkHour" required>
+            <span class="form-message"></span>
           </div>
         </div>
       </div>
@@ -48,7 +52,7 @@
             <input type="range" class="form-range " min="18" max="60" id="rangeAge" required>
           </div>
           <div class="col-md-6">
-            <label for="inputAddress" class="form-label">Image</label>
+            <label for="inputImage" class="form-label">Image</label>
             <input type="file" class="form-control" aria-label="file example" id="image">
             <div class="invalid-feedback">Example invalid form file feedback</div>
           </div>
@@ -57,7 +61,7 @@
       <div class="col-12">
         <div class="row">
           <div class="col-md-4">
-            <label for="inputState" class="form-label">Role</label>
+            <label for="inputRole" class="form-label">Role</label>
             <select id="cmbRole" class="form-select">
               <option selected>Employee</option>
               <option>Manager</option>
@@ -65,11 +69,12 @@
             </select>
           </div>
           <div class="col-md-2">
-            <label for="inputZip" class="form-label">Basic Salary</label>
+            <label for="inputSalary" class="form-label">Basic Salary</label>
             <input type="text" class="form-control" id="txtSalary" required>
+            <span class="form-message"></span>
           </div>
           <div class="col-md-6">
-            <label for="inputAddress" class="form-label">Gender</label>
+            <label for="inputGender" class="form-label">Gender</label>
             <div class="d-flex">
               <div class="form-check">
                 <input type="radio" class="form-check-input" id="optMale" name="radio-stacked" required checked>

@@ -111,7 +111,7 @@ export class EmployeeList {
 
         return arrEmployee.map((employee, index) => {
             let { _id, age, email, gender, hour, role, salary, image, name } = employee;
-            let total = this.calculateTotal({ salary: salary, role: role });
+            let total = this.calculateTotal({ salary, role });
             return `
             <tr key=${index}>
             <td>${_id}</td>
