@@ -4,7 +4,7 @@ import { EmployeeList } from "./model/EmployeeList";
 import { EmployeeType } from "./constant/user.type";
 import moment from 'moment';
 
-const btnAdd = <HTMLElement>document.getElementById("btnAdd");
+const btnSubmit = <HTMLElement>document.getElementById("btnSubmit");
 const txtEmail = <HTMLInputElement>document.getElementById("txtEmail");
 const txtPassword = <HTMLInputElement>document.getElementById("txtPassword");
 const txtName = <HTMLInputElement>document.getElementById("txtName");
@@ -41,7 +41,8 @@ function clickAddEmployee() {
   const role = cmbRole.value;
   const gender = optMale.checked ? true : false;
   let image = '';
-  if (validateEmail(email) && validateName(name) && validatePassword(password)) {
+
+  if (validateEmail(email) && validateName(name) && validatePassword(password) && checkEmail(txtEmail.value)) {
     //...gán vào new Employee
     let createEmployee = () => {
       const nv = new Employee({
@@ -57,7 +58,10 @@ function clickAddEmployee() {
         gender: gender,
       });
       employees.addEmployee(nv);
-
+      employees.saveData(employees.employeeList);
+      let result = employees.render();
+      tbody.innerHTML = result;
+      resetForm();
     }
     if (fileImage.files && fileImage.files.length > 0) {
       let reader = new FileReader();
@@ -72,14 +76,11 @@ function clickAddEmployee() {
     else {
       createEmployee();
     }
-    employees.saveData(employees.employeeList);
-  }
-  let result = employees.render();
-  tbody.innerHTML = result;
-}
 
-btnAdd.addEventListener('click', clickAddEmployee)
-//fileReader bất đồng bộ, khi lưu vào local storage phải chờ??
+  }
+
+}
+btnSubmit.addEventListener('click', clickAddEmployee)
 
 tbody.addEventListener('click', (e) => {
   const target = e.target as HTMLElement;
@@ -94,9 +95,43 @@ tbody.addEventListener('click', (e) => {
   }
 });
 
-//update còn lỗi, khi update nó tự so sánh email với chính mình 
-tbody.addEventListener('click', (e) => {
+// ERROR:
+//không thể update avatar, (có thể do dùng filereader)
 
+function clickUpdateEmployee(employee: EmployeeType) {
+  if (validateEmail(txtEmail.value) && validateName(txtName.value) && validatePassword(txtPassword.value) && checkEmail(txtEmail.value, employee._id)) {
+    employee.email = txtEmail.value;
+    employee.name = txtName.value;
+    employee.password = txtPassword.value;
+    employee.salary = +txtSalary.value;
+    optMale.checked == true ? employee.gender = true : employee.gender = false;
+    employee.age = +rangeAge.value;
+    employee.hour = +txtWorkHour.value;
+    employee.updated_at = moment(new Date()).format('MM-DD-YYYY\tHH:mm:ssSSS');
+    employee.role = cmbRole.value;
+
+    if (fileImage.files && fileImage.files.length > 0) {
+      let reader = new FileReader();
+      reader.onload = () => {
+        if (reader.readyState === 2)
+          employee.image = reader.result as string;
+      }
+      reader.readAsDataURL(fileImage.files[0]);
+    }
+    else employee.image = '';
+
+    employees.updateEmployee(employee._id, employee);
+    employees.saveData(employees.employeeList);
+    let result = employees.render();
+    tbody.innerHTML = result;
+
+  }
+  resetForm()
+  console.log('uyen');
+
+}
+
+tbody.addEventListener('click', (e) => {
   const target = e.target as HTMLElement;
   if (target.classList.contains('iconUpdate')) {
     const id = target.getAttribute('id') as string;
@@ -110,48 +145,18 @@ tbody.addEventListener('click', (e) => {
       nhanVien.gender == true ? (optMale.checked = true) : (optFemale.checked = true);
       rangeAge.value = nhanVien.age.toString();
       txtWorkHour.value = nhanVien.hour.toString();
-      fileImage.value = nhanVien.image;
+      fileImage.value = '';
       cmbRole.value = nhanVien.role;
 
-      //sau đó gán lại các thuộc tính chỉnh sửa cho nhân viên đó (trước khi gán thì kiểm tra email có trùng với các email khác không)
-      //file reader bất đồng bộ nên khi tải ảnh lên, phải đợi nó hiển thị (??sos)
-      btnAdd.removeEventListener('click', clickAddEmployee);
-      btnAdd.addEventListener('click', () => {
-        // checkEmail(txtEmail.value);
-        if (validateEmail(txtEmail.value) && validateName(txtName.value) && validatePassword(txtPassword.value)) {
-          nhanVien.email = txtEmail.value;
-          nhanVien.name = txtName.value;
-          nhanVien.password = txtPassword.value;
-          nhanVien.salary = +txtSalary.value;
-          optMale.checked == true ? nhanVien.gender = true : nhanVien.gender = false;
-          nhanVien.age = +rangeAge.value;
-          nhanVien.hour = +txtWorkHour.value;
-          nhanVien.updated_at = moment(new Date()).format('MM-DD-YYYY\tHH:mm:ssSSS');
-          nhanVien.role = cmbRole.value;
-
-          if (fileImage.files && fileImage.files.length > 0) {
-            let reader = new FileReader();
-            reader.onload = () => {
-              if (reader.readyState === 2)
-                nhanVien.image = reader.result as string;
-            }
-            reader.readAsDataURL(fileImage.files[0]);
-          }
-          else nhanVien.image = '';
-
-          employees.updateEmployee(nhanVien._id, nhanVien);
-          employees.saveData(employees.employeeList);
-          let result = employees.render();
-          tbody.innerHTML = result;
-        }
-      })
+      btnSubmit.removeEventListener('click', clickAddEmployee)
+      btnSubmit.addEventListener('click', () => clickUpdateEmployee(nhanVien));
     }
+    btnSubmit.removeEventListener('click', () => clickUpdateEmployee(nhanVien));
   }
-
 });
 
 btnSearch.addEventListener('click', () => {
-  employees.searchEmployee(txtSearch.value);
+  let searchList: EmployeeType[] = employees.searchEmployee(txtSearch.value);
   //nếu txtSearch trống thì render dữ liệu lấy từ local
   if (txtSearch.value == "") {
     let dataGet: EmployeeType[] = employees.getData();
@@ -160,7 +165,7 @@ btnSearch.addEventListener('click', () => {
     tbody.innerHTML = content;
   }
   else {
-    let result = employees.render();
+    let result = employees.renderArray(searchList);
     tbody.innerHTML = result;
   }
 })
@@ -231,21 +236,22 @@ function hideError(input: HTMLInputElement): void {
   message.textContent = '';
 }
 //check email trùng
-function checkEmail(email: string): void {
-  let employee = <EmployeeType>employees.employeeList.find(emp => emp.email === email)
+function checkEmail(email: string, id: string = ''): boolean {
+  let employee = <EmployeeType>employees.employeeList.find(emp => emp.email === email && emp._id !== id)
   if (employee) {
     showError(txtEmail, 'Existed email');
+    return false;
   }
+  else return true;
 }
 
-//function validateData(): void {
 //đúng định dạng email
 function validateEmail(email: string): boolean {
   const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
   return regex.test(email);
 }
 txtEmail.onblur = () => {
-  checkEmail(txtEmail.value);
+
   if (!validateEmail(txtEmail.value)) {
     showError(txtEmail, 'Invalid email format');
   }
@@ -253,6 +259,7 @@ txtEmail.onblur = () => {
 
 //tên chỉ chứa chữ, từ 10-30 ký tự
 function validateName(name: string): boolean {
+  //(không nhập có dấu)
   const regex = /^[a-zA-Z\s]{10,30}$/;
   return regex.test(name);
 }

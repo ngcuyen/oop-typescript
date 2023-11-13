@@ -2,6 +2,7 @@ import { EmployeeType } from "../constant/user.type";
 
 export class EmployeeList {
     employeeList: Array<EmployeeType> = this.getData();
+
     addEmployee(nv: EmployeeType): void {
         let cloneList = [...this.employeeList];
         cloneList.push(nv);
@@ -26,15 +27,15 @@ export class EmployeeList {
     }
 
     //tìm kiếm theo chức vụ
-    searchEmployee(content: string): void {
+    searchEmployee(content: string) {
         content = content.toLowerCase();
         let cloneList = [...this.employeeList];
-        let array: EmployeeType[] = cloneList.filter((item) =>
+        return cloneList.filter((item) =>
             item.role.toLowerCase().includes(content) || // Tìm kiếm trong role
             item.name.toLowerCase().includes(content) || // Tìm kiếm trong name
             item._id.toLowerCase().includes(content)   // Tìm kiếm trong id
         );
-        this.employeeList = array;
+
     }
 
     // Sắp xếp tăng dần theo tên
@@ -96,7 +97,7 @@ export class EmployeeList {
             <td>${role}</td>
             <td>${gender ? 'Male' : 'Female'}</td>
             <td>${salary}</td>
-            <td><img src = "${image}" alt="Avatar" class="d-block" style=" width: 45px; height: 45px; borderRadius: 50%;"/></td>
+            <td><img src = "${image}" alt="Avatar" class="d-block" style=" width: 45px; height: 45px; border-radius: 50%;"/></td>
             <td>${total}</td>
             <td> 
                 <i class="fas fa-trash-alt iconDelete" id="${_id}" ></i>
@@ -122,7 +123,7 @@ export class EmployeeList {
             <td>${role}</td>
             <td>${gender ? 'Male' : 'Female'}</td>
             <td>${salary}</td>
-            <td><img src = "${image}" alt="Avatar" class="d-block" style=" width: 45px; height: 45px; borderRadius: 100%;"/></td>
+            <td><img src = "${image}" alt="Avatar" class="d-block" style=" width: 45px; height: 45px; border-radius: 50%;"/></td>
             <td>${total}</td>
             <td> 
                 <i class="fas fa-trash-alt iconDelete" index="${index}" ></i>
